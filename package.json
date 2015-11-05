@@ -24,5 +24,11 @@
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/gggordon/Crabber/issues"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.5"
+  },
+  "dependencies": {
+    "jquery": "~2.1.4"
   }
 }
