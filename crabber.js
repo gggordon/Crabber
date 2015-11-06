@@ -27,7 +27,7 @@
         _self.title = props.title || "";
         _self.url = props.url || "";
         _self.description = props.description || "";
-        _self.type = props.type || "";
+        _self.type = props.type || "website";
         _self.imageUrl = props.imageUrl || "";
         
         /**
@@ -69,12 +69,38 @@
          */
         _self._getContentFromLinks=function(links,callback){
         	var contents = [];
-        	
+        	for(var i=0;i<links.length;i++){
+
+        	}
         	if(callback && typeof callback == 'function')
         		callback(contents);
 
         	return contents;
         };
+        _self.__getContentUsingYQL=function(link,callback){
+        	var yqlQuery = "select * from html where url=\""+link+"\" and xpath='/html'";
+        	var yqlUrl = "https://query.yahooapis.com/v1/public/yql?q="+encodeURIComponent(yqlQuery)+"&format=json&diagnostics=true&callback=";
+        	$.ajax({
+                 url:yqlUrl,
+                 success:function(data){
+                 	console.log('success');
+                    console.log(data);
+                    var head = data.query.results.html.head;
+                    var title = head.title;
+                    var desc = (function(meta){
+                         for(var i=0;i< meta.length;i++){
+                           if(meta[i].name=="description")
+                             return meta[i].content;
+                         }
+                         return '';
+                     })(head.meta);
+                 },
+                 error:function(err){
+                 	console.log('error');
+                    console.log(err);
+                 }
+             });
+        }
         /**
          * Append contents to node 
          * @param contents Array|ExternalContent
