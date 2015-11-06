@@ -50,17 +50,17 @@
          * @overide
          */
         _self.display=function(options){
-            return '<div class="crabber-view">
-                        <a href="'+_self.url+'">
-                            <div class="cv-left">
-                                <img src="'+_self.imageUrl+'" alt="'+_self.title+'"/>
-                            </div>
-                            <div class="cv-right">
-                                <h4>'+_self.title+'</h4>
-                                <p>'+_self.description+'</p>
-                                <p><i>from '+_self.websiteUrl+'</i></p>
-                            </div>
-                        </a>
+            return '<div class="crabber-view">\
+                        <a href="'+_self.url+'">\
+                            <div class="cv-left">\
+                                <img src="'+_self.imageUrl+'" alt="'+_self.title+'"/>\
+                            </div>\
+                            <div class="cv-right">\
+                                <h4>'+_self.title+'</h4>\
+                                <p>'+_self.description+'</p>\
+                                <p><i>from '+_self.websiteUrl+'</i></p>\
+                            </div>\
+                        </a>\
                     </div>';
         }
  	}
@@ -80,8 +80,10 @@
         
         _self._$tbox=$(divNode);
         _self._$viewNode = $(options.viewNode || (function($tbox){
-            var uuid= "crab-view-"+Math.random()*50;
-            $tbox.after('<div id="'+uuid+'" class="crab-view"></div>');
+            var uuid= "crab-view-"+parseInt(Math.random()*50000);
+            $tbox.after('<div id="'+uuid+'" class="crab-view"></div>').promise().then(function(){
+                _self._$viewNode = $('#'+uuid);
+            });
             return $('#'+uuid).get(0);
         })(_self._$tbox));
         _self.links = [];
@@ -120,7 +122,7 @@
                         firstImg = (function(imgUrl){
                                       var img_url= imgUrl.match(/^(?:[a-z]+:)?\/\//i) != null ?
                                               imgUrl : 
-                                              getWebsiteUrl(link)+imgUrl;
+                                              getWebsiteUrl(link)+"/"+imgUrl;
                                       return img_url.indexOf('http') > -1 ? img_url : "http:"+img_url;
                                    })($doc.find('img[src]').attr('src') || ""); 
                         if(callback && typeof callback == 'function')
@@ -157,16 +159,16 @@
          * @param evt Event
          */
         _self._appendOutputOnTextChange=function(evt){
-            var newLinks = _self._getLinksFromStr(_self._$tbox.html())
+            var newLinks = _self._getLinksFromStr(_self._$tbox.val())
                                 .filter(function(link){
-                                            var isNew = _self.links.indexOf(link) > -1;
+                                            var isNew = _self.links.indexOf(link) == -1;
                                             if(isNew)
                                                 _self.links.push(link);
                                             return isNew;
                                 }) || [];
             _self._getContentFromLinks(newLinks,_self._appendContentToNode)
         };
-        _self._$tbox.on('textchange',_self._appendOutputOnTextChange);
+        _self._$tbox.change(_self._appendOutputOnTextChange);
  	}
 
     if(w instanceof Object){
