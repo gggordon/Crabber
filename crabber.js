@@ -20,9 +20,8 @@
      */
     function getWebsiteUrl(url,fullPath) {
         var    a      = document.createElement('a');
-               a.href = data;
-               console.log(a);
-        return a.protocol+"//"+a.hostname+(a.port ? ":"+a.port: "" );
+               a.href = url;
+        return a.protocol+"//"+a.hostname+(a.port ? ":"+a.port: "" )+(fullPath ? a.pathname : "");
     }
 
  	/**
@@ -51,7 +50,18 @@
          * @overide
          */
         _self.display=function(options){
-            return '<div class=""></div>';
+            return '<div class="crabber-view">
+                        <a href="'+_self.url+'">
+                            <div class="cv-left">
+                                <img src="'+_self.imageUrl+'" alt="'+_self.title+'"/>
+                            </div>
+                            <div class="cv-right">
+                                <h4>'+_self.title+'</h4>
+                                <p>'+_self.description+'</p>
+                                <p><i>from '+_self.websiteUrl+'</i></p>
+                            </div>
+                        </a>
+                    </div>';
         }
  	}
 
@@ -86,7 +96,6 @@
          * @param callback function(Array|ExternalContent) Callback function accepting array of ExternalContent
          */
         _self._getContentFromLinks=function(links,callback){
-        	var contents = [];
         	for(var i=0;i<links.length;i++){
                 _self.__getContentUsingYQL(links[i],callback);
         	}
@@ -109,10 +118,11 @@
                     var title    = $doc.find('title').html(),
                         desc     = $doc.find('meta[name="description"]').attr("content") || "No description",
                         firstImg = (function(imgUrl){
-                                       return imgUrl.indexOf('http') > -1 ?
+                                      var img_url= imgUrl.match(/^(?:[a-z]+:)?\/\//i) != null ?
                                               imgUrl : 
                                               getWebsiteUrl(link)+imgUrl;
-                                   })($doc.find('img').attr('src') || ""); 
+                                      return img_url.indexOf('http') > -1 ? img_url : "http:"+img_url;
+                                   })($doc.find('img[src]').attr('src') || ""); 
                         if(callback && typeof callback == 'function')
                             callback([new ExternalContent({
                                 title:title,
@@ -156,6 +166,7 @@
                                 }) || [];
             _self._getContentFromLinks(newLinks,_self._appendContentToNode)
         };
+        _self._$tbox.on('textchange',_self._appendOutputOnTextChange);
  	}
 
     if(w instanceof Object){
