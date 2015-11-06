@@ -79,7 +79,8 @@
         };
         _self.__getContentUsingYQL=function(link,callback){
         	var yqlQuery = "select * from html where url=\""+link+"\" and xpath='/html'";
-        	var yqlUrl = "https://query.yahooapis.com/v1/public/yql?q="+encodeURIComponent(yqlQuery)+"&format=json&diagnostics=true&callback=";
+        	//https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20html%20where%20url%3D%22http%3A%2F%2Figonics.com%22%20and%20xpath%3D'%2Fhtml'&diagnostics=true
+        	var yqlUrl = "https://query.yahooapis.com/v1/public/yql?q="+encodeURIComponent(yqlQuery)+"&diagnostics=true";
         	$.ajax({
                  url:yqlUrl,
                  success:function(data){
