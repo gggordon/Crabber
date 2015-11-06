@@ -12,7 +12,21 @@
  	if($==undefined || $ == null){
  		throw new Exception("jQuery required for Crabber");
  	}
+    /**
+     * @method getWebsiteUrl
+     * @description Gets Website URL from Link String
+     * @param url String Url to parse
+     * @param [fullPath] Boolean Get Full Path if true and get's only Base URI if false/undefined
+     */
+    function getWebsiteUrl(url,fullPath) {
+        var    a      = document.createElement('a');
+               a.href = data;
+               console.log(a);
+        return a.protocol+"//"+a.hostname+(a.port ? ":"+a.port: "" );
+    }
+
  	/**
+ 	 * @class ExternalContent
      * @param props Object Configuration Object
      * @param props.title String Title
      * @param props.description String Page Description
@@ -29,6 +43,7 @@
         _self.description = props.description || "";
         _self.type = props.type || "website";
         _self.imageUrl = props.imageUrl || "";
+        _self.websiteUrl = props.websiteUrl || "";
         
         /**
          * Display HTML 
@@ -41,6 +56,7 @@
  	}
 
  	/**
+ 	 * @class Crabber
  	 * @param divNode HTMLInputElement
  	 * @param options Object
  	 * @param options.
@@ -64,19 +80,24 @@
         	return (str || "").match(/(http:|https:)?\/\/\S+/ig) || [];
         };
         /**
+         * @method _getContentFromLinks
+         * @private
          * @param links Array|string 
          * @param callback function(Array|ExternalContent) Callback function accepting array of ExternalContent
          */
         _self._getContentFromLinks=function(links,callback){
         	var contents = [];
         	for(var i=0;i<links.length;i++){
-
+                _self.__getContentUsingYQL(links[i],callback);
         	}
-        	if(callback && typeof callback == 'function')
-        		callback(contents);
-
-        	return contents;
         };
+
+        /**
+         * @method __getContentUsingYQL
+         * @private
+         * @param link String 
+         * @param callback function(Array|ExternalContent) Callback function accepting array of ExternalContent
+         */
         _self.__getContentUsingYQL=function(link,callback){
         	var yqlQuery = "select * from html where url=\""+link+"\" and xpath='/html'";
         	//https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20html%20where%20url%3D%22http%3A%2F%2Figonics.com%22%20and%20xpath%3D'%2Fhtml'&diagnostics=true
@@ -84,24 +105,31 @@
         	$.ajax({
                  url:yqlUrl,
                  success:function(data){
-                 	console.log('success');
-                    console.log(data);
-                    var head = data.query.results.html.head;
-                    var title = head.title;
-                    var desc = (function(meta){
-                         for(var i=0;i< meta.length;i++){
-                           if(meta[i].name=="description")
-                             return meta[i].content;
-                         }
-                         return '';
-                     })(head.meta);
+                 	var $doc = $(data);
+                    var title    = $doc.find('title').html(),
+                        desc     = $doc.find('meta[name="description"]').attr("content") || "No description",
+                        firstImg = (function(imgUrl){
+                                       return imgUrl.indexOf('http') > -1 ?
+                                              imgUrl : 
+                                              getWebsiteUrl(link)+imgUrl;
+                                   })($doc.find('img').attr('src') || ""); 
+                        if(callback && typeof callback == 'function')
+                            callback([new ExternalContent({
+                                title:title,
+                                description:desc,
+                                url:link,
+                                imageUrl:firstImg,
+                                websiteUrl:getWebsiteUrl(link)
+                            })]);
+                    console.log('Successfully requested content from : '+link);
                  },
                  error:function(err){
-                 	console.log('error');
+                 	console.log('Error requesting content from : '+link);
                     console.log(err);
                  }
              });
-        }
+        };
+
         /**
          * Append contents to node 
          * @param contents Array|ExternalContent
