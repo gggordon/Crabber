@@ -5,33 +5,33 @@
  * @license MIT
  * @created 12.11.2015
  */
-.crab-view {
+.crabber-view {
   width:100%;
   box-shadow: 2px 2px 2px #e7e7e7;
   border:1px solid #e7e7e7;
   padding: 3px;
 }
-.crab-view .cv-left , .crab-view .cv-right {
+.crabber-view .cv-left , .crabber-view .cv-right {
   margin:0px; padding:0px; border:0px;
 }
-.crab-view .cv-left {
+.crabber-view .cv-left {
   width:20%;
   display:inline-block;
   border:1px solid red;
   vertical-align: top;
 }
 
-.crab-view .cv-left * {
+.crabber-view .cv-left * {
   max-width:100%;
 }
 
-.crab-view .cv-right {
+.crabber-view .cv-right {
   width:75%;
   display:inline-block;
   padding:2px;
 }
 
-.crab-view .cv-right h4 {
+.crabber-view .cv-right h4 {
   left:20px;
   margin-left:40px;
 }
