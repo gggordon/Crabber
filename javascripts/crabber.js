@@ -53,7 +53,7 @@
             return '<div class="crabber-view">\
                         <a href="'+_self.url+'">\
                             <div class="cv-left">\
-                                <img src="'+_self.imageUrl+'" alt="'+_self.title+'"/>\
+                                <img src="'+_self.imageUrl+'" alt="'+_self.title+'" onerror="Crabber.remove_image" />\
                             </div>\
                             <div class="cv-right">\
                                 <h4>'+_self.title+'</h4>\
@@ -148,8 +148,13 @@
          */
         _self._appendContentToNode=function(contents){
              (contents || []).map(function(cn){
+                 var $newCrabNode = $(cn.display());
+                 $newCrabNode.crabber = function(){
+                    console.log('I was called with arguments : ');
+                    console.log(arguments);
+                 }
                  _self._$viewNode.append(
-                     cn.display()
+                     $newCrabNode
                  );	
              });
         }
@@ -171,12 +176,20 @@
         _self._$tbox.change(_self._appendOutputOnTextChange);
  	}
 
+    /**
+     * Fallback for images that do not load
+     */
+    Crabber.remove_image = function(evt){
+        console.log('Removed '+$(this).attr('src'))
+        $(this).remove();
+    }
+
     if(w instanceof Object){
         w.Crabber = Crabber;
     }
     $.fn.crabber = function(opts){
         return this.each(function(i,el){
-        	new Crabber(el,opts);
+        	$(el).data('crab',new Crabber(el,opts));
         });
     };
  	
