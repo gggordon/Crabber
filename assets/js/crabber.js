@@ -65,7 +65,7 @@
             return '<div class="crabber-view">\
                         <a target="_blank" href="'+_self.url+'">\
                             <div class="cv-left">\
-                                <img src="'+_self.imageUrl+'" alt="'+_self.title+'" onerror="Crabber.remove_image" />\
+                                <img src="'+_self.imageUrl+'" alt="'+_self.title+'" onerror="Crabber.remove_image(this)" />\
                             </div>\
                             <div class="cv-right">\
                                 <h4>'+_self.title+'</h4>\
@@ -79,11 +79,10 @@
 
  	/**
  	 * @class Crabber
- 	 * @param divNode HTMLInputElement
- 	 * @param options Object
-     * @param options.descWordCount String Number of words to get from description
+ 	 * @param divNode HTMLInputElement textbox that should be monitored for new links
+ 	 * @param options Object configuration settings
+     * @param [options.descWordCount] String Number of words to get from description. Default: 20
      * @param [options.appendContent] Boolean Whether crabber should append/prepend content. Default: true
- 	 * @param options.
  	 */
  	function Crabber(divNode, options){
         if(divNode == null || divNode == undefined)
@@ -195,9 +194,10 @@
     /**
      * Fallback for images that do not load
      */
-    Crabber.remove_image = function(evt){
-        console.log('Removed '+$(this).attr('src'))
-        $(this).remove();
+    Crabber.remove_image = function(node){
+        console.log('remove_image called');
+        console.log('Removed '+$(node).attr('src'));
+        $(node).remove();
     }
 
     if(w instanceof Object){

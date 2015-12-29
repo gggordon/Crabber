@@ -19,6 +19,7 @@
   width:100%;
   display:inline-block;
   vertical-align: top;
+  text-align: center;
 }
 
 .crabber-view .cv-left * {
