@@ -1,0 +1,37 @@
+/**
+ * @author gggordon <https://github.com/gggordon>
+ * @overview Crabber
+ * @description Grabs Content of External Links Posted - Stylesheet
+ * @license MIT
+ * @created 12.11.2015
+ */
+.crabber-view {
+  width:100%;
+  box-shadow: 2px 2px 2px #e7e7e7;
+  border:1px solid #e7e7e7;
+  padding: 3px;
+}
+.crabber-view .cv-left , .crabber-view .cv-right {
+  margin:0px; padding:0px; border:0px;
+}
+.crabber-view .cv-left {
+  width:20%;
+  display:inline-block;
+  border:1px solid red;
+  vertical-align: top;
+}
+
+.crabber-view .cv-left * {
+  max-width:100%;
+}
+
+.crabber-view .cv-right {
+  width:75%;
+  display:inline-block;
+  padding:2px;
+}
+
+.crabber-view .cv-right h4 {
+  left:20px;
+  margin-left:40px;
+}
