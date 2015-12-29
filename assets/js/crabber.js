@@ -5,7 +5,7 @@
  * @license MIT
  * @created 2.11.2015
  * @dependencies
- *     - jquery 2.1.*
+ *     - jquery >1.11.*
  */
 
  (function($,w){
@@ -24,6 +24,17 @@
         return a.protocol+"//"+a.hostname+(a.port ? ":"+a.port: "" )+(fullPath ? a.pathname : "");
     }
 
+    /**
+     * @method firstNWords
+     * @description Gets first N words of a string
+     * @param str String String to extract words from
+     * @param [wordCount] Integer Number of words to get. Default: 20
+     */
+    function firstNWords(str,wordCount){
+        wordCount = wordCount || 20;
+        return typeof str == 'string' ? str.split(' ').slice(0,wordCount).join(' ') : "";
+    }
+
  	/**
  	 * @class ExternalContent
      * @param props Object Configuration Object
@@ -31,6 +42,7 @@
      * @param props.description String Page Description
      * @param props.videoUrl String Url of Video
      * @param props.url String Link Url
+     * @param props.descWordCount String Number of words to get from description
      * @param props.videoType String ** Not Used
      * @param props.imageUrl String ** Not Used
  	 */
@@ -39,7 +51,7 @@
         var _self = this;
         _self.title = props.title || "";
         _self.url = props.url || "";
-        _self.description = props.description || "";
+        _self.description = firstNWords(props.description,props.descWordCount) || "";
         _self.type = props.type || "website";
         _self.imageUrl = props.imageUrl || "";
         _self.websiteUrl = props.websiteUrl || "";
@@ -51,7 +63,7 @@
          */
         _self.display=function(options){
             return '<div class="crabber-view">\
-                        <a href="'+_self.url+'">\
+                        <a target="_blank" href="'+_self.url+'">\
                             <div class="cv-left">\
                                 <img src="'+_self.imageUrl+'" alt="'+_self.title+'" onerror="Crabber.remove_image" />\
                             </div>\
@@ -69,6 +81,8 @@
  	 * @class Crabber
  	 * @param divNode HTMLInputElement
  	 * @param options Object
+     * @param options.descWordCount String Number of words to get from description
+     * @param [options.appendContent] Boolean Whether crabber should append/prepend content. Default: true
  	 * @param options.
  	 */
  	function Crabber(divNode, options){
@@ -77,7 +91,8 @@
 
         options = options || {};
         var _self = this;
-        
+        _self.descWordCount = options.descWordCount || 20;
+        _self.appendContent = options.appendContent==false?false : true;
         _self._$tbox=$(divNode);
         _self._$viewNode = $(options.viewNode || (function($tbox){
             var uuid= "crab-view-"+parseInt(Math.random()*50000);
@@ -131,7 +146,8 @@
                                 description:desc,
                                 url:link,
                                 imageUrl:firstImg,
-                                websiteUrl:getWebsiteUrl(link)
+                                websiteUrl:getWebsiteUrl(link),
+                                descWordCount:_self.descWordCount
                             })]);
                     console.log('Successfully requested content from : '+link);
                  },
@@ -153,7 +169,7 @@
                     console.log('I was called with arguments : ');
                     console.log(arguments);
                  }
-                 _self._$viewNode.append(
+                 _self._$viewNode[_self.appendContent ? "append" : "prepend"](
                      $newCrabNode
                  );	
              });
