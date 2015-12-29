@@ -5,7 +5,7 @@
  * @license MIT
  * @created 2.11.2015
  * @dependencies
- *     - jquery 2.1.*
+ *     - jquery >1.11.*
  */
 
  (function($,w){
@@ -24,6 +24,17 @@
         return a.protocol+"//"+a.hostname+(a.port ? ":"+a.port: "" )+(fullPath ? a.pathname : "");
     }
 
+    /**
+     * @method firstNWords
+     * @description Gets first N words of a string
+     * @param str String String to extract words from
+     * @param [wordCount] Integer Number of words to get. Default: 20
+     */
+    function firstNWords(str,wordCount){
+        wordCount = wordCount || 20;
+        return typeof str == 'string' ? str.split(' ').slice(0,wordCount).join(' ') : "";
+    }
+
  	/**
  	 * @class ExternalContent
      * @param props Object Configuration Object
@@ -31,6 +42,7 @@
      * @param props.description String Page Description
      * @param props.videoUrl String Url of Video
      * @param props.url String Link Url
+     * @param props.descWordCount String Number of words to get from description
      * @param props.videoType String ** Not Used
      * @param props.imageUrl String ** Not Used
  	 */
@@ -39,7 +51,7 @@
         var _self = this;
         _self.title = props.title || "";
         _self.url = props.url || "";
-        _self.description = props.description || "";
+        _self.description = firstNWords(props.description,props.descWordCount) || "";
         _self.type = props.type || "website";
         _self.imageUrl = props.imageUrl || "";
         _self.websiteUrl = props.websiteUrl || "";
@@ -50,26 +62,27 @@
          * @overide
          */
         _self.display=function(options){
-            return '<div class="crabber-view">
-                        <a href="'+_self.url+'">
-                            <div class="cv-left">
-                                <img src="'+_self.imageUrl+'" alt="'+_self.title+'"/>
-                            </div>
-                            <div class="cv-right">
-                                <h4>'+_self.title+'</h4>
-                                <p>'+_self.description+'</p>
-                                <p><i>from '+_self.websiteUrl+'</i></p>
-                            </div>
-                        </a>
+            return '<div class="crabber-view">\
+                        <a target="_blank" href="'+_self.url+'">\
+                            <div class="cv-left">\
+                                <img src="'+_self.imageUrl+'" alt="'+_self.title+'" onerror="Crabber.remove_image(this)" />\
+                            </div>\
+                            <div class="cv-right">\
+                                <h4>'+_self.title+'</h4>\
+                                <p>'+_self.description+'</p>\
+                                <p><i>from '+_self.websiteUrl+'</i></p>\
+                            </div>\
+                        </a>\
                     </div>';
         }
  	}
 
  	/**
  	 * @class Crabber
- 	 * @param divNode HTMLInputElement
- 	 * @param options Object
- 	 * @param options.
+ 	 * @param divNode HTMLInputElement textbox that should be monitored for new links
+ 	 * @param options Object configuration settings
+     * @param [options.descWordCount] String Number of words to get from description. Default: 20
+     * @param [options.appendContent] Boolean Whether crabber should append/prepend content. Default: true
  	 */
  	function Crabber(divNode, options){
         if(divNode == null || divNode == undefined)
@@ -77,11 +90,14 @@
 
         options = options || {};
         var _self = this;
-        
+        _self.descWordCount = options.descWordCount || 20;
+        _self.appendContent = options.appendContent==false?false : true;
         _self._$tbox=$(divNode);
         _self._$viewNode = $(options.viewNode || (function($tbox){
-            var uuid= "crab-view-"+Math.random()*50;
-            $tbox.after('<div id="'+uuid+'" class="crab-view"></div>');
+            var uuid= "crab-view-"+parseInt(Math.random()*50000);
+            $tbox.after('<div id="'+uuid+'" class="crab-view"></div>').promise().then(function(){
+                _self._$viewNode = $('#'+uuid);
+            });
             return $('#'+uuid).get(0);
         })(_self._$tbox));
         _self.links = [];
@@ -120,7 +136,7 @@
                         firstImg = (function(imgUrl){
                                       var img_url= imgUrl.match(/^(?:[a-z]+:)?\/\//i) != null ?
                                               imgUrl : 
-                                              getWebsiteUrl(link)+imgUrl;
+                                              getWebsiteUrl(link)+"/"+imgUrl;
                                       return img_url.indexOf('http') > -1 ? img_url : "http:"+img_url;
                                    })($doc.find('img[src]').attr('src') || ""); 
                         if(callback && typeof callback == 'function')
@@ -129,7 +145,8 @@
                                 description:desc,
                                 url:link,
                                 imageUrl:firstImg,
-                                websiteUrl:getWebsiteUrl(link)
+                                websiteUrl:getWebsiteUrl(link),
+                                descWordCount:_self.descWordCount
                             })]);
                     console.log('Successfully requested content from : '+link);
                  },
@@ -146,8 +163,13 @@
          */
         _self._appendContentToNode=function(contents){
              (contents || []).map(function(cn){
-                 _self._$viewNode.append(
-                     cn.display()
+                 var $newCrabNode = $(cn.display());
+                 $newCrabNode.crabber = function(){
+                    console.log('I was called with arguments : ');
+                    console.log(arguments);
+                 }
+                 _self._$viewNode[_self.appendContent ? "append" : "prepend"](
+                     $newCrabNode
                  );	
              });
         }
@@ -157,24 +179,33 @@
          * @param evt Event
          */
         _self._appendOutputOnTextChange=function(evt){
-            var newLinks = _self._getLinksFromStr(_self._$tbox.html())
+            var newLinks = _self._getLinksFromStr(_self._$tbox.val())
                                 .filter(function(link){
-                                            var isNew = _self.links.indexOf(link) > -1;
+                                            var isNew = _self.links.indexOf(link) == -1;
                                             if(isNew)
                                                 _self.links.push(link);
                                             return isNew;
                                 }) || [];
             _self._getContentFromLinks(newLinks,_self._appendContentToNode)
         };
-        _self._$tbox.on('textchange',_self._appendOutputOnTextChange);
+        _self._$tbox.change(_self._appendOutputOnTextChange);
  	}
+
+    /**
+     * Fallback for images that do not load
+     */
+    Crabber.remove_image = function(node){
+        console.log('remove_image called');
+        console.log('Removed '+$(node).attr('src'));
+        $(node).remove();
+    }
 
     if(w instanceof Object){
         w.Crabber = Crabber;
     }
     $.fn.crabber = function(opts){
         return this.each(function(i,el){
-        	new Crabber(el,opts);
+        	$(el).data('crab',new Crabber(el,opts));
         });
     };
  	
