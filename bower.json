@@ -1,0 +1,31 @@
+{
+  "name": "crabber",
+  "description": "Grabs Content of External Links Posted",
+  "main": "crabber.js",
+  "authors": [
+    "gggordon"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "link",
+    "content",
+    "grabbing",
+    "SEO",
+    "automatic",
+    "content",
+    "generator",
+    "generation",
+    "jquery",
+    "jquery-plugin",
+    "ecosystem:jquery"
+  ],
+  "homepage": "http://gggordon.github.io/Crabber/",
+  "moduleType": [],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
