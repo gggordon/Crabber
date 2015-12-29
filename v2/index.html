@@ -54,7 +54,7 @@
                   <label for="txtLinks">Try it out!</label>
                   <textarea class="form-control" name="txtLinks" id="txtLinks" placeholder="Write or paste any links here"></textarea>
                 </div>
-                <button type="submit" class="btn btn-primary pull-right">Update</button>
+                <button title="Click to update. No, this button does nothing except allow you the user to leave the textbox. When the textbox loses focus, crabber grabs content for new links" type="button" class="btn btn-primary pull-right">Update</button>
         	</form>
         </div>
         <div class="col-sm-4">
@@ -96,7 +96,10 @@
         <script src="./assets/js/main.js"></script>
         <script type="text/javascript">
             //This where I used crabber
-            $('.crab-area').crabber();
+            $('#txtLinks').crabber({
+            	viewNode:'.demo-area',
+            	appendContent:false
+            });
         </script>
         <script>
             (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
