@@ -10,7 +10,7 @@
 
  (function($,w){
  	if($==undefined || $ == null){
- 		throw new Exception("jQuery required for Crabber");
+ 		throw new Error("jQuery required for Crabber");
  	}
     /**
      * @method getWebsiteUrl
